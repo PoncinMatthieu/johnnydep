@@ -56,6 +56,15 @@ class JohnnyDist(anytree.NodeMixin):
             self.req = pkg_resources.Requirement.parse(self.name + self.specifier)
             self.import_names = _discover_import_names(req_string)
             self.metadata = _extract_metadata(req_string)
+        elif req_string.endswith(".txt") and os.path.isfile(req_string):
+            self.name = req_string
+            self.specifier = ""
+            self.req = pkg_resources.Requirement.parse("requirements")
+            self.import_names = ["requirements"]
+            with open(self.name, 'r') as f:
+                lines = f.readlines()
+            lines = [line for line in lines if not line.startswith('-') and not line.startswith('git+')]
+            self.metadata = {"requires_dist": lines}
         else:
             self.req = pkg_resources.Requirement.parse(req_string)
             self.name = canonicalize_name(self.req.name)
